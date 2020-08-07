@@ -42,8 +42,10 @@ const display = (function() {
     startGameButton.addEventListener('click', emitStartClick);
 
     function emitTileClick() {
-        console.log(this.id);
-        events.emit('tileClick', this.id.charAt(this.id.length-1));
+        if (!this.innerText) {
+            console.log(this.id);
+            events.emit('tileClick', this.id.charAt(this.id.length-1));
+        }
     }
 
     function emitStartClick() {
@@ -76,11 +78,9 @@ const display = (function() {
         // console.log(board);
         for (let i = 0; i < 3; i++) {
             for (let j = 0; j < 3; j++) {
-                if (board[i][j]) {
-                    let tileNum = parseTileIndicies(i, j);
-                    let tile = document.querySelector('#tile_' + tileNum.toString());
-                    tile.innerText = board[i][j];
-                }
+                let tileNum = parseTileIndicies(i, j);
+                let tile = document.querySelector('#tile_' + tileNum.toString());
+                tile.innerText = (board[i][j]) ? board[i][j] : '';
             }
         }
     };
@@ -93,10 +93,12 @@ const display = (function() {
 
 // game controller module
 const gameController = (function() {
+    var players;
+
     const turnChanger = (function() {
-        var turn = false;
+        var turn = randNum0or1();
         function changeTurn() {
-            turn = !turn;
+            turn = (turn === 1) ? 0 : 1;
         }
         return {
             getTurn: function() {
@@ -146,17 +148,27 @@ const gameController = (function() {
         };
     })();
 
-    function startGame(players) {
+    function initGame(playersList) {
+        console.log(playersList);
+        players = playersList;
+        playersList[randNum0or1()].first = true;
+        console.log(turnChanger.getTurn());
+        console.log(turnChanger.getTurn());
         console.log(players);
-        players[randNum0or1()].first = true;
-        console.log(turnChanger.getTurn());
-        console.log(turnChanger.getTurn());
+        // new event emitter here that turns on all event emitters. new event emitter at end of game which turns off all event emitters 
     }
+    
 
     function randNum0or1() {
         return Math.round(Math.random());
     }
 
-    events.on('startClick', startGame);
-    events.on('tileClick', board_array.changeTile);
+    function performTurn(tileNum) {
+        let turn = turnChanger.getTurn();
+        console.log(players[turn].name + 's turn');
+        board_array.changeTile(tileNum, players[turn].symb);
+    }
+
+    events.on('startClick', initGame);
+    events.on('tileClick', performTurn);
 })();
