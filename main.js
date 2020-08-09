@@ -38,12 +38,12 @@ const display = (function() {
             tile.addEventListener('click', emitTileClick);
         });
     var startGameButton = document.querySelector('#start');
-    console.log(startGameButton);
+    // console.log(startGameButton);
     startGameButton.addEventListener('click', emitStartClick);
 
     function emitTileClick() {
         if (!this.innerText) {
-            console.log(this.id);
+            // console.log(this.id);
             events.emit('tileClick', this.id.charAt(this.id.length-1));
         }
     }
@@ -95,6 +95,7 @@ const display = (function() {
 const gameController = (function() {
     var players;
 
+    // turn control submodule
     const turnChanger = (function() {
         var turn = randNum0or1();
         function changeTurn() {
@@ -108,6 +109,7 @@ const gameController = (function() {
         }
     })();
     
+    // board array submodule (maybe could be a main module since it is basically model) 
     const board_array = (function() {
         let board = [];
         for (let i = 0; i < 3; i++) {
@@ -125,6 +127,33 @@ const gameController = (function() {
         function emitTriggerRender() {
             events.emit('triggerRender', board);
         }
+        function transposeBoard() {
+            let board_transpose = [];
+            for (let i = 0; i < 3; i++) {
+                board_transpose[i] = [];
+                for (let j = 0; j < 3; j++) {
+                    board_transpose[i][j] = board[j][i];
+                }
+            }
+            return board_transpose;
+        }
+        
+        function diagonalsBoard() {
+            let diagonals = [];
+            let diag1_temp = [];
+            let diag2_temp = [];
+            for (let i = 0, j = 2; i < 3; i++, j--) {
+                diag1_temp.push(board[i][i]);
+                diag2_temp.push(board[i][j]);
+            }
+            diagonals.push(diag1_temp);
+            diagonals.push(diag2_temp);
+            return diagonals;
+        }
+
+        function checkLine(value, symb) {
+            return value === symb;
+        }
 
         return {
             reset: function() {
@@ -133,14 +162,25 @@ const gameController = (function() {
                         board[i][j] = null;
                     }
                 }
-                emitTriggerRender()
+                emitTriggerRender();
             },
             changeTile: function(tileNum, symb) {
                 let indices = parseTileNumber(tileNum);
                 // console.log(indices.row, indices.col);
                 board[indices.row][indices.col] = symb;
-                emitTriggerRender()
+                emitTriggerRender();
                 // console.log(board[indices.row][indices.col])
+            },
+            checkWin: function() {
+                let linesArray = [].concat(board, transposeBoard(), diagonalsBoard());
+                let win = linesArray.some((line) => {
+                    let check_symb = line[0];
+                    if (check_symb) {
+                        let check = line.every( value => value === check_symb );
+                        return check;
+                    }
+                })
+                return win;
             },
             getBoard: function() {
                 return board;
@@ -149,12 +189,9 @@ const gameController = (function() {
     })();
 
     function initGame(playersList) {
-        console.log(playersList);
+        // console.log(playersList);
         players = playersList;
         playersList[randNum0or1()].first = true;
-        console.log(turnChanger.getTurn());
-        console.log(turnChanger.getTurn());
-        console.log(players);
         // new event emitter here that turns on all event emitters. new event emitter at end of game which turns off all event emitters 
     }
     
@@ -167,6 +204,9 @@ const gameController = (function() {
         let turn = turnChanger.getTurn();
         console.log(players[turn].name + 's turn');
         board_array.changeTile(tileNum, players[turn].symb);
+        let win = board_array.checkWin();
+        console.log(win);
+        // if (win) console.log('win');
     }
 
     events.on('startClick', initGame);
