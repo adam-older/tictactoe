@@ -2,25 +2,40 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
     <link rel="stylesheet" href="./styles.css" defer>
+    
     <script src="./main.js" defer></script>
+    <script src="./modal.js" defer></script>
     <title>tictactoe</title>
 </head>
 <body>
-    <div class="center">
-        <label for="p1_name">Player 1 Name:</label>
-        <input id="p1_name">
-        <label for="p2_name">Player 2 Name:</label>
-        <input id="p2_name">
-        <button id="start">Start Game</button>
+    <h2 class="center title">tictactoe</h2>
+    <!-- Trigger/Open The Modal -->
+    <button id="myBtn" class="center_button">New Game</button>
+    <!-- The Modal -->
+    <div id="myModal" class="modal">
+        <!-- Modal content -->
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <div class="center">
+                <label for="p1_name">Player 1 Name:</label>
+                <input id="p1_name">
+                <label for="p2_name">Player 2 Name:</label>
+                <input id="p2_name">
+                <button id="start">Start Game</button>
+            </div>
+            <div class="center">
+                <label for="p1_symb">Player 1 Symbol:</label>
+                <input id="p1_symb" value="X" maxlength="1">
+                <label for="p2_symb">Player 2 Symbol:</label>
+                <input id="p2_symb" value="O" maxlength="1">
+            </div>
+        </div>
     </div>
-    <div class="center">
-        <label for="p1_symb">Player 1 Symbol:</label>
-        <input id="p1_symb" value="X" maxlength="1">
-        <label for="p2_symb">Player 2 Symbol:</label>
-        <input id="p2_symb" value="O" maxlength="1">
-    </div>
+
+    
     <div class="board">
         <div class="tile" id="tile_1"><span></span></div>
         <div class="tile" id="tile_2"><span></span></div>
