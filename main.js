@@ -40,6 +40,8 @@ const display = (function() {
     var startGameButton = document.querySelector('#start');
     // console.log(startGameButton);
     startGameButton.addEventListener('click', emitStartClick);
+    var playAgainButton = document.querySelector('#playagain');
+    playAgainButton.addEventListener('click', emitPlayAgain);
 
     function emitTileClick() {
         if (!this.innerText) {
@@ -89,6 +91,18 @@ const display = (function() {
         let tileNum = (row * 3) + col + 1;
         return tileNum;
     }
+
+    function renderGameEnds() {
+
+    }
+
+    function alertGameEnd(winnerName) {
+        let endinfo = document.querySelector('.endinfo');
+        endinfo.firstElementChild.innerText = winnerName + " wins!";
+        endinfo.style.display = "block";
+    }
+
+    events.on('gameEnds', alertGameEnd);
 })();
 
 // game controller module
@@ -192,6 +206,7 @@ const gameController = (function() {
         // console.log(playersList);
         players = playersList;
         playersList[randNum0or1()].first = true;
+        events.on('tileClick', performTurn);
         // new event emitter here that turns on all event emitters. new event emitter at end of game which turns off all event emitters 
     }
     
@@ -205,10 +220,17 @@ const gameController = (function() {
         console.log(players[turn].name + 's turn');
         board_array.changeTile(tileNum, players[turn].symb);
         let win = board_array.checkWin();
+        if (win) gameEndsWithWinner(players[turn]);
         console.log(win);
         // if (win) console.log('win');
     }
 
+    function gameEndsWithWinner(winner) {
+        console.log(winner.name + " wins");
+        events.off('tileClick', performTurn);
+        events.emit('gameEnds', winner.name);
+    }
+
     events.on('startClick', initGame);
-    events.on('tileClick', performTurn);
+    
 })();
