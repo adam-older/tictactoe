@@ -60,6 +60,11 @@ const display = (function() {
         }      
     };
 
+    function emitPlayAgain() {
+        removeGameEndAlert();
+        events.emit('playAgain');
+    }
+
     function captureNamesSymbs() {
         p1Name = document.querySelector('#p1_name').value;
         p1Symb = document.querySelector('#p1_symb').value[0];
@@ -73,8 +78,6 @@ const display = (function() {
             return [PlayerFactory(p1Name, p1Symb), PlayerFactory(p2Name, p2Symb)];
         }
     };
-
-    events.on('triggerRender', render);
 
     function render(board) {
         // console.log(board);
@@ -92,10 +95,6 @@ const display = (function() {
         return tileNum;
     }
 
-    function renderGameEnds() {
-
-    }
-
     function alertGameEnd(winnerName) {
         let endinfo = document.querySelector('.endinfo');
         let winMessage = (winnerName === 'tie') ? 'It\'s a tie!' : `${winnerName} wins!`
@@ -103,6 +102,12 @@ const display = (function() {
         endinfo.style.display = "block";
     }
 
+    function removeGameEndAlert() {
+        let endinfo = document.querySelector('.endinfo');
+        endinfo.style.display = "none";
+    }
+
+    events.on('triggerRender', render);
     events.on('gameEnds', alertGameEnd);
 })();
 
@@ -211,10 +216,15 @@ const gameController = (function() {
         };
     })();
 
-    function initGame(playersList) {
-        // console.log(playersList);
+    function getPlayerList(playersList) {
         players = playersList;
-        playersList[randNum0or1()].first = true;
+    }
+
+    function initGame() {
+        // console.log(playersList);
+        board_array.reset();
+        players.forEach( player => player.first = false );
+        players[randNum0or1()].first = true;
         events.on('tileClick', performTurn);
         // new event emitter here that turns on all event emitters. new event emitter at end of game which turns off all event emitters 
     }
@@ -251,6 +261,12 @@ const gameController = (function() {
         events.emit('gameEnds', 'tie');
     }
 
+    function resetGame() {
+        initGame()
+    }
+
+    events.on('playAgain', resetGame);
+    events.on('startClick', getPlayerList);
     events.on('startClick', initGame);
     
 })();
