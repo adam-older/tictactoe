@@ -98,7 +98,8 @@ const display = (function() {
 
     function alertGameEnd(winnerName) {
         let endinfo = document.querySelector('.endinfo');
-        endinfo.firstElementChild.innerText = winnerName + " wins!";
+        let winMessage = (winnerName === 'tie') ? 'It\'s a tie!' : `${winnerName} wins!`
+        endinfo.firstElementChild.innerText = winMessage;
         endinfo.style.display = "block";
     }
 
@@ -190,11 +191,19 @@ const gameController = (function() {
                 let win = linesArray.some((line) => {
                     let check_symb = line[0];
                     if (check_symb) {
+                        let notComplete = line.some( value => value === null );
                         let check = line.every( value => value === check_symb );
                         return check;
                     }
                 })
                 return win;
+            },
+            checkBoardIncomplete: function() {
+                let complete = board.some((line) => {
+                    let notComplete = line.some( value => value === null );
+                        return notComplete;
+                });
+                return complete;
             },
             getBoard: function() {
                 return board;
@@ -220,7 +229,12 @@ const gameController = (function() {
         console.log(players[turn].name + 's turn');
         board_array.changeTile(tileNum, players[turn].symb);
         let win = board_array.checkWin();
-        if (win) gameEndsWithWinner(players[turn]);
+        let notComplete = board_array.checkBoardIncomplete();
+        if (win) {
+            gameEndsWithWinner(players[turn]);
+        } else if (!notComplete) {
+            gameEndWithTie();
+        }
         console.log(win);
         // if (win) console.log('win');
     }
@@ -229,6 +243,12 @@ const gameController = (function() {
         console.log(winner.name + " wins");
         events.off('tileClick', performTurn);
         events.emit('gameEnds', winner.name);
+    }
+
+    function gameEndWithTie() {
+        console.log('tie');
+        events.off('tileClick', performTurn);
+        events.emit('gameEnds', 'tie');
     }
 
     events.on('startClick', initGame);
